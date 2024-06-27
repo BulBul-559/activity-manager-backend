@@ -1,5 +1,31 @@
 from django.db import models
+from django.db import models
+from django.core.exceptions import ValidationError
 
+
+# def validate_existing_file(value):
+#     if not value:
+#         return
+#     from django.core.files.storage import default_storage
+#     if not default_storage.exists(value):
+#         raise ValidationError(f"The file '{value}' does not exist.")
+#
+# class RawPhoto(models.Model):
+#     name = models.CharField(max_length=100)
+#     shoot_time = models.DateTimeField(null=True, blank=True)
+#     upload_time = models.DateTimeField(auto_now_add=True)
+#     uploader = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+#     modify_time = models.DateTimeField(auto_now=True)
+#     upload_photo = models.FileField(upload_to='')
+#     existing_photo = models.FilePathField(path='/path/to/existing/images', match='*.jpg', recursive=True, blank=True, null=True, validators=[validate_existing_file])
+#
+#     def save(self, *args, **kwargs):
+#         if self.upload_photo and self.existing_photo:
+#             raise ValidationError("You can only use either 'uploaded_image' or 'existing_image_path', not both.")
+#         super().save(*args, **kwargs)
+#
+#     def __str__(self):
+#         return self.name
 
 class Sduter(models.Model):
     sdut_id = models.CharField(max_length=20, db_index=True)  # username in User model
@@ -30,22 +56,51 @@ class Youtholer(models.Model):
 class Machine(models.Model):
 
     machine_id = models.IntegerField()
-
-    pass
-
-
-class MachineRecord(models.Model):
-
-    pass
+    model = models.CharField(max_length=50)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+    description = models.CharField(max_length=1000)
 
 
-class TaskRecord(models.Model):
+class MachineAlloc(models.Model):
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
+    youtholer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+    allocation_time = models.DateTimeField(auto_now_add=True)
+    finish_time = models.DateTimeField(null=True)
+    is_valid = models.BooleanField(default=True)
+    reason = models.CharField(default='', max_length=1000)
 
-    pass
+
+class Task(models.Model):
+    name = models.CharField(max_length=100)
+    organizer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+    member = models.ManyToManyField(Youtholer)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True)
+    is_valid = models.BooleanField(default=True)
 
 
-class Photo(models.Model):
+class RawPhoto(models.Model):
+    name = models.CharField(max_length=100)
+    shoot_time = models.DateTimeField(null=True, blank=True)
+    upload_time = models.DateTimeField(auto_now_add=True)
+    uploader = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+    modify_time = models.DateTimeField(auto_now=True)
+    path = models.FilePathField(path='/path/to/existing/images', match='*.jpg', recursive=True, blank=True, null=True)
 
-    pass
+    def __str__(self):
+        return self.name
+
+
+class PhotoProfile(models.Model):
+    origin = models.ForeignKey(RawPhoto, on_delete=models.CASCADE)
+    path = models.FilePathField(path='')
+
+
+class FinalPhoto(models.Model):
+    origin = models.ForeignKey(RawPhoto, on_delete=models.SET_NULL)
+    uploader = models.ForeignKey(Youtholer, on_delete=models.DO_NOTHING)
+    path = models.FileField(upload_to='')
+    upload_time = models.DateTimeField(auto_now_add=True)
+
 
 
