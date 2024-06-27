@@ -72,8 +72,8 @@ class MachineAlloc(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=100)
-    organizer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
-    member = models.ManyToManyField(Youtholer)
+    organizer = models.ForeignKey(Youtholer, related_name='burden_task', on_delete=models.CASCADE)
+    member = models.ManyToManyField(Youtholer, related_name='attend_task')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True)
     is_valid = models.BooleanField(default=True)
@@ -97,7 +97,7 @@ class PhotoProfile(models.Model):
 
 
 class FinalPhoto(models.Model):
-    origin = models.ForeignKey(RawPhoto, on_delete=models.SET_NULL)
+    origin = models.ForeignKey(RawPhoto, null=True, on_delete=models.SET_NULL)
     uploader = models.ForeignKey(Youtholer, on_delete=models.DO_NOTHING)
     path = models.FileField(upload_to='')
     upload_time = models.DateTimeField(auto_now_add=True)

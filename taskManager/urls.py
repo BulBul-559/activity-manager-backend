@@ -1,8 +1,13 @@
-from django.urls import path
 
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import AccountApiSet
 from . import views
 
+router = DefaultRouter()
+router.register(r'account', AccountApiSet, basename='account')
+
 urlpatterns = [
-    # path("addDuty/", views.addDuty),
-    # path("ClearNotFinishDuty/", views.ClearNotFinishDuty),
+    path('', include(router.urls)),
+    path('GetUserInfo/', views.GetUserInfo),
 ]
