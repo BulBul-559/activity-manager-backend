@@ -9,5 +9,5 @@ router.register(r'account', AccountApiSet, basename='account')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('GetUserInfo/', views.GetUserInfo),
+    path('Create/', views.Create),
 ]

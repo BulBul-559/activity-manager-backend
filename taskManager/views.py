@@ -24,10 +24,10 @@ def Create(request):
         Sign up to the system.
         Here just a simple example.
     """
-    # username = 'sunorain'
-    # password = 'youthol'
-    # email = "1079729701@qq.com"
-    # User.objects.create_user(username, email, password)
+    username = 'sunorain'
+    password = 'youthol'
+    email = "1079729701@qq.com"
+    User.objects.create_user(username, email, password)
 
     sdut_id = 'sunorain'
     name = '小悠'
@@ -89,11 +89,10 @@ class AccountApiSet(viewsets.ViewSet):
                 response_data['sign_state'] = '登录成功'
             return Response(response_data, status=status.HTTP_200_OK)
         else:
-            print('succ')
             return Response({'error': 'Invalid credentials', 'sign_state': '账号或密码错误'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path="change")
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny], url_path="change")
     def change_password(self, request):
         request_data = request.data
 
@@ -104,11 +103,17 @@ class AccountApiSet(viewsets.ViewSet):
         users = Sduter.objects.filter(sdut_id=username)[0]
 
         if user is not None:
+
+            refresh = RefreshToken.for_user(user)
+            refresh['sdut_id'] = user.username
+            access = refresh.access_token
+
             new_pwd = request_data['new_pwd']
             again_pwd = request_data['again_pwd']
             if new_pwd != again_pwd:
                 response_data = {'message': '两次密码不一致'}
                 return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
             user = User.objects.get(username=username)
             user.set_password(new_pwd)
             user.save()
@@ -116,34 +121,33 @@ class AccountApiSet(viewsets.ViewSet):
             if 'first_login' in request_data:
                 users.first_login = False
                 users.save()
-            response_data = {'message': '修改成功'}
+
+            response_data = {
+                'message': '修改成功',
+                'access_token': str(access),
+                'refresh_token': str(refresh)
+            }
             return Response(response_data, status=status.HTTP_200_OK)
         else:
             response_data = {'message': '原密码错误'}
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
-
-@api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
-def GetUserInfo(request):
-    """
-        Verify the token and return the user basic infomation.
-        1. sdut_id (same as username)
-
-    """
-    # 只有经过身份验证的用户才能访问此视图
-    # 获取用户的基本信息
-    token = request.headers.get('Authorization').split(' ')[1]
-    try:
-        # 解析 Access Token
-        access_token = AccessToken(token)
-        # 获取用户信息
-        sdut_id = access_token.payload.get('sdut_id')
-
-        # 在这里查询其他的信息并返回
-
-        return HttpResponse(json.dumps({'sdut_id': sdut_id}))
-    except Exception as e:
-        return HttpResponse(json.dumps({'error': 'Invalid token'}))
-
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path="info")
+    def get_info(self, request):
+        """
+            Verify the token and return the user basic infomation.
+            1. sdut_id (same as username)
+        """
+        # 只有经过身份验证的用户才能访问此视图
+        # 获取用户的基本信息
+        token = request.headers.get('Authorization').split(' ')[1]
+        try:
+            # 解析 Access Token
+            access_token = AccessToken(token)
+            # 获取用户信息
+            sdut_id = access_token.payload.get('sdut_id')
+            # 在这里查询其他的信息并返回
+            return Response({'sdut_id': sdut_id}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
 
