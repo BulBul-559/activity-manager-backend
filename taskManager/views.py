@@ -18,8 +18,12 @@ import json
 
 from .models import Sduter
 from .models import Youtholer
+from .models import Machine
 
 from .serializers import YoutholerSerializer
+from .serializers import MachineSerializer
+from django.http import FileResponse
+
 def Create(request):
     """
         Sign up to the system.
@@ -183,3 +187,26 @@ class AccountApiSet(viewsets.ViewSet):
             return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class MachineModelViewSet(viewsets.ModelViewSet):
+    queryset = Machine.objects.all()
+    serializer_class = MachineSerializer
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    @action(methods=['get', 'post'], detail=True)
+    def download(self, request, pk=None, *args, **kwargs):
+        file_obj = self.get_object()
+        response = FileResponse(open(file_obj.profile.path, 'rb'))
+        return response
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)

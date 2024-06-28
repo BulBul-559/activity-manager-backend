@@ -7,7 +7,7 @@ from .models import Task
 from .models import RawPhoto
 from .models import PhotoProfile
 from .models import FinalPhoto
-
+from django.urls import reverse
 
 class SduterSerializer(serializers.ModelSerializer):
 
@@ -23,10 +23,19 @@ class YoutholerSerializer(serializers.ModelSerializer):
 
 
 class MachineSerializer(serializers.ModelSerializer):
+    profile_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Machine
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['profile']
+
+    def get_profile_url(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            return None
+        # 构建下载 URL
+        return request.build_absolute_uri(reverse('machine-download', args=[obj.pk]))
 
 
 class MachineAllocSerializer(serializers.ModelSerializer):
