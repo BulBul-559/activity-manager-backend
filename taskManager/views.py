@@ -19,6 +19,7 @@ import json
 from .models import Sduter
 from .models import Youtholer
 
+from .serializers import YoutholerSerializer
 def Create(request):
     """
         Sign up to the system.
@@ -151,3 +152,34 @@ class AccountApiSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny], url_path="youtholer")
+    def get_youtholer(self, request):
+        """
+            Verify the token and return the user basic infomation.
+            1. sdut_id (same as username)
+
+        """
+        # 只有经过身份验证的用户才能访问此视图
+        # 获取用户的基本信息
+        token = request.headers.get('Authorization').split(' ')[1]
+        try:
+            # 解析 Access Token
+            access_token = AccessToken(token)
+            # 获取用户信息
+            sdut_id = access_token.payload.get('sdut_id')
+            youthol = Youtholer.objects.filter(sdut_id=sdut_id)[0]
+
+
+            if not youthol:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = YoutholerSerializer(youthol)
+
+            response_data = {
+                'message': "获取信息成功",
+                'data': serializer.data
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
