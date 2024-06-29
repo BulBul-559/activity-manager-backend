@@ -27,8 +27,8 @@ class MachineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Machine
-        # fields = '__all__'
-        exclude = ['profile']
+        fields = '__all__'
+        # exclude = ['profile']
 
     def get_profile_url(self, obj):
         request = self.context.get('request')

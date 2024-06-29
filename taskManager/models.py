@@ -55,12 +55,14 @@ class Youtholer(models.Model):
 
 class Machine(models.Model):
 
-    machine_id = models.IntegerField()
+    # machine_id = models.IntegerField()
     name = models.CharField(max_length=50, default='Youthol')
     model = models.CharField(max_length=50)
     purchase_date = models.DateTimeField(auto_now_add=True)
     description = models.CharField(max_length=1000)
+    type = models.CharField(max_length=50, default="相机")
     profile = models.FileField(upload_to='profile/machine/')
+
 
 class MachineAlloc(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
