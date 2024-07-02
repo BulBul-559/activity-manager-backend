@@ -162,12 +162,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_TZ = True
+# 设置时区为中国标准时间
+TIME_ZONE = 'Asia/Shanghai'
 
+# 启用时区支持
+USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

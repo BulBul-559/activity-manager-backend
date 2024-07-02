@@ -27,6 +27,15 @@ from django.core.exceptions import ValidationError
 #     def __str__(self):
 #         return self.name
 
+
+class Comment(models.Model):
+    username = models.CharField(max_length=20)
+    time = models.DateTimeField(max_length=20)
+    content = models.CharField(max_length=2000)
+
+
+    pass
+
 class Sduter(models.Model):
     sdut_id = models.CharField(max_length=20, db_index=True)  # username in User model
     name = models.CharField(max_length=20, null=True)
@@ -64,13 +73,23 @@ class Machine(models.Model):
     profile = models.FileField(upload_to='profile/machine/')
 
 
-class MachineAlloc(models.Model):
+class MachineBorrowRecord(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     youtholer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
-    allocation_time = models.DateTimeField(auto_now_add=True)
+    borrow_time = models.DateTimeField()
+    finish_time = models.DateTimeField()
+    borrow_reason = models.CharField(default='', max_length=1000)
+
+
+class MachineBorrowHistory(models.Model):
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
+    youtholer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+    borrow_time = models.DateTimeField(auto_now_add=True)
     finish_time = models.DateTimeField(null=True)
-    is_valid = models.BooleanField(default=True)
-    reason = models.CharField(default='', max_length=1000)
+    actual_finish_time = models.DateTimeField(null=True,blank=True)
+    borrow_reason = models.CharField(default='', max_length=1000)
+    return_description = models.CharField(default='',max_length=1000)
+    is_return = models.BooleanField(default=False)
 
 
 class Task(models.Model):

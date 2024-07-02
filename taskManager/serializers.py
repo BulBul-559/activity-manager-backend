@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import Sduter
 from .models import Youtholer
 from .models import Machine
-from .models import MachineAlloc
+from .models import MachineBorrowRecord
+from .models import MachineBorrowHistory
 from .models import Task
 from .models import RawPhoto
 from .models import PhotoProfile
@@ -17,10 +18,17 @@ class SduterSerializer(serializers.ModelSerializer):
 
 
 class YoutholerSerializer(serializers.ModelSerializer):
+    origin_info = SduterSerializer
+
     class Meta:
         model = Youtholer
         fields = '__all__'
 
+    def create(self, validated_data):
+        origin_info_data = validated_data.pop('origin_info')
+        origin_info, created = Sduter.objects.get_or_create(**origin_info_data)
+        youtholer = Youtholer.objects.create(origin_info=origin_info, **validated_data)
+        return youtholer
 
 class MachineSerializer(serializers.ModelSerializer):
     profile_url = serializers.SerializerMethodField()
@@ -38,33 +46,77 @@ class MachineSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(reverse('machine-download', args=[obj.pk]))
 
 
-class MachineAllocSerializer(serializers.ModelSerializer):
+class MachineBorrowRecordSerializer(serializers.ModelSerializer):
+    machine = serializers.PrimaryKeyRelatedField(queryset=Machine.objects.all())
+    youtholer = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all())
 
     class Meta:
-        model = MachineAlloc
+        model = MachineBorrowRecord
+        fields = '__all__'
+
+
+class MachineBorrowHistorySerializer(serializers.ModelSerializer):
+    machine = MachineSerializer(read_only=True)
+    machine_id = serializers.PrimaryKeyRelatedField(queryset=Machine.objects.all(), source='machine', write_only=True)
+    youtholer = YoutholerSerializer(read_only=True)
+    youtholer_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='youtholer', write_only=True)
+
+    class Meta:
+        model = MachineBorrowHistory
         fields = '__all__'
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    organizer = YoutholerSerializer(read_only=True)
+    organizer_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='organizer', write_only=True)
+    member = YoutholerSerializer(many=True, read_only=True)
+    member_ids = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), many=True, write_only=True, source='member')
 
     class Meta:
         model = Task
         fields = '__all__'
 
+    def create(self, validated_data):
+        members_data = validated_data.pop('member')
+        task = Task.objects.create(**validated_data)
+        task.member.set(members_data)
+        return task
+
+    def update(self, instance, validated_data):
+        members_data = validated_data.pop('member')
+        instance.name = validated_data.get('name', instance.name)
+        instance.organizer = validated_data.get('organizer', instance.organizer)
+        instance.end_time = validated_data.get('end_time', instance.end_time)
+        instance.is_valid = validated_data.get('is_valid', instance.is_valid)
+        instance.save()
+
+        instance.member.set(members_data)
+        return instance
+
 
 class RawPhotoSerializer(serializers.ModelSerializer):
+    uploader = YoutholerSerializer(read_only=True)
+    uploader_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='uploader', write_only=True)
 
     class Meta:
         model = RawPhoto
         fields = '__all__'
 
+
 class PhotoProfileSerializer(serializers.ModelSerializer):
+    origin = RawPhotoSerializer(read_only=True)  # 嵌套的 RawPhoto 序列化器
+    origin_id = serializers.PrimaryKeyRelatedField(queryset=RawPhoto.objects.all(), source='origin', write_only=True)
 
     class Meta:
         model = PhotoProfile
         fields = '__all__'
 
+
 class FinalPhotoSerializer(serializers.ModelSerializer):
+    origin = RawPhotoSerializer(read_only=True)  # 嵌套的 RawPhoto 序列化器
+    origin_id = serializers.PrimaryKeyRelatedField(queryset=RawPhoto.objects.all(), source='origin', write_only=True)
+    uploader = YoutholerSerializer(read_only=True)  # 嵌套的 Youtholer 序列化器
+    uploader_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='uploader', write_only=True)
 
     class Meta:
         model = FinalPhoto

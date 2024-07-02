@@ -1,28 +1,8 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.contrib.auth.models import User
-from django.utils import timezone
-from django.contrib.auth import authenticate
-from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.authtoken.models import Token
-# generate token and verify the token
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny,IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from datetime import datetime, timedelta
 
-from .utils import tokenToId
-import json
-
-from .models import Sduter
-from .models import Youtholer
-from .models import Machine
-
-from .serializers import YoutholerSerializer
-from .serializers import MachineSerializer
-from django.http import FileResponse
+from ..models import Sduter
+from ..models import Youtholer
 
 def Create(request):
     """
