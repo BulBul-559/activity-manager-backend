@@ -8,11 +8,9 @@ from django.utils import timezone
 from ..models import Youtholer
 from ..models import Machine
 from ..models import MachineBorrowRecord
-from ..models import MachineBorrowHistory
 
 from ..serializers import MachineSerializer
 from ..serializers import MachineBorrowRecordSerializer
-from ..serializers import MachineBorrowHistorySerializer
 
 from intervaltree import IntervalTree
 from datetime import datetime
@@ -92,15 +90,15 @@ class MachineBorrowViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            borrow_time = serializer.validated_data['borrow_time']
+            start_time = serializer.validated_data['start_time']
             finish_time = serializer.validated_data['finish_time']
             machine_id = serializer.validated_data['machine'].id
 
             # 获取当前机器的所有借用记录
             busy_list = MachineBorrowRecord.objects.filter(
                 machine_id=machine_id,
-                finish_time__gt=borrow_time,
-                borrow_time__lt=finish_time
+                finish_time__gt=start_time,
+                start_time__lt=finish_time
             )
 
             # 使用 IntervalTree 判断时间段重叠
@@ -108,7 +106,7 @@ class MachineBorrowViewSet(viewsets.ModelViewSet):
             for item in busy_list:
                 busy_time[item.borrow_time.timestamp():item.finish_time.timestamp()] = item.id
 
-            if busy_time.overlap(borrow_time.timestamp(), finish_time.timestamp()):
+            if busy_time.overlap(start_time.timestamp(), finish_time.timestamp()):
                 return Response({'detail': '设备在该时间段内已经被借用'}, status=status.HTTP_400_BAD_REQUEST)
 
             serializer.save()
