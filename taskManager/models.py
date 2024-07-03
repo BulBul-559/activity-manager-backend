@@ -68,20 +68,11 @@ class Machine(models.Model):
 class MachineBorrowRecord(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     youtholer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
-    borrow_time = models.DateTimeField()
+    borrow_time = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField()
     finish_time = models.DateTimeField()
     borrow_reason = models.CharField(default='', max_length=1000)
-
-
-class MachineBorrowHistory(models.Model):
-    machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
-    youtholer = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
-    borrow_time = models.DateTimeField(auto_now_add=True)
-    finish_time = models.DateTimeField(null=True)
-    actual_finish_time = models.DateTimeField(null=True,blank=True)
-    borrow_reason = models.CharField(default='', max_length=1000)
-    return_description = models.CharField(default='',max_length=1000)
-    is_return = models.BooleanField(default=False)
+    is_cancle = models.BooleanField(default=False)
 
 
 class Task(models.Model):

@@ -3,7 +3,6 @@ from .models import Sduter
 from .models import Youtholer
 from .models import Machine
 from .models import MachineBorrowRecord
-from .models import MachineBorrowHistory
 from .models import Task
 from .models import RawPhoto
 from .models import PhotoProfile
@@ -47,17 +46,6 @@ class MachineBorrowRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MachineBorrowRecord
-        fields = '__all__'
-
-
-class MachineBorrowHistorySerializer(serializers.ModelSerializer):
-    machine = MachineSerializer(read_only=True)
-    machine_id = serializers.PrimaryKeyRelatedField(queryset=Machine.objects.all(), source='machine', write_only=True)
-    youtholer = YoutholerSerializer(read_only=True)
-    youtholer_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='youtholer', write_only=True)
-
-    class Meta:
-        model = MachineBorrowHistory
         fields = '__all__'
 
 
