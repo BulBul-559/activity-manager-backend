@@ -18,17 +18,12 @@ class SduterSerializer(serializers.ModelSerializer):
 
 
 class YoutholerSerializer(serializers.ModelSerializer):
-    origin_info = SduterSerializer
+    origin_info =  serializers.PrimaryKeyRelatedField(queryset=Sduter.objects.all())
 
     class Meta:
         model = Youtholer
         fields = '__all__'
 
-    def create(self, validated_data):
-        origin_info_data = validated_data.pop('origin_info')
-        origin_info, created = Sduter.objects.get_or_create(**origin_info_data)
-        youtholer = Youtholer.objects.create(origin_info=origin_info, **validated_data)
-        return youtholer
 
 class MachineSerializer(serializers.ModelSerializer):
     profile_url = serializers.SerializerMethodField()

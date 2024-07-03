@@ -28,14 +28,6 @@ from django.core.exceptions import ValidationError
 #         return self.name
 
 
-class Comment(models.Model):
-    username = models.CharField(max_length=20)
-    time = models.DateTimeField(max_length=20)
-    content = models.CharField(max_length=2000)
-
-
-    pass
-
 class Sduter(models.Model):
     sdut_id = models.CharField(max_length=20, db_index=True)  # username in User model
     name = models.CharField(max_length=20, null=True)
