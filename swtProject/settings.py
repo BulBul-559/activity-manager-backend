@@ -165,7 +165,7 @@ LANGUAGE_CODE = "en-us"
 
 USE_I18N = True
 
-# 设置时区为中国标准时间
+# 设置时区为中国标准时间=
 TIME_ZONE = 'Asia/Shanghai'
 
 # 启用时区支持

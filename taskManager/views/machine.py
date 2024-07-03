@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.response import Response
 from django.http import FileResponse
+from django.utils import timezone
 
 from ..models import Youtholer
 from ..models import Machine
@@ -14,6 +15,8 @@ from ..serializers import MachineBorrowRecordSerializer
 from ..serializers import MachineBorrowHistorySerializer
 
 from intervaltree import IntervalTree
+from datetime import datetime
+
 
 class MachineModelViewSet(viewsets.ModelViewSet):
     queryset = Machine.objects.all()
@@ -53,13 +56,18 @@ class MachineBorrowViewSet(viewsets.ModelViewSet):
         # 如果 user 参数不存在，则返回所有记录
         return MachineBorrowRecord.objects.all()
 
+
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        # 获取今天日期的开始时间
+        today_start = datetime.combine(timezone.localtime(timezone.now()).date(), datetime.min.time())
+
+        # 修改查询集，只包括从今天开始的记录
+        queryset = self.get_queryset().filter(borrow_time__gte=today_start)
         page = self.paginate_queryset(queryset)
+
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             data = serializer.data
-
             return self.get_paginated_response({'data': data})
 
         serializer = self.get_serializer(queryset, many=True)
@@ -69,7 +77,6 @@ class MachineBorrowViewSet(viewsets.ModelViewSet):
             i['borrower'] = youthol.name
 
         return Response(data, status=status.HTTP_200_OK)
-
     # def list(self, request, *args, **kwargs):
     #     # 重写 GET 方法
     #     queryset = self.get_queryset()
