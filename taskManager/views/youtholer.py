@@ -109,3 +109,13 @@ class YoutholerModelViewSet(viewsets.ModelViewSet):
             result_list.append(data)
 
         return Response(result_list, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path="list")
+    def get_member_list(self, request):
+        youtholers = Youtholer.objects.all()
+        result_list = [
+            {'id': youtholer.id, 'name': youtholer.name, 'sdut_id': youtholer.sdut_id}
+            for youtholer in youtholers
+        ]
+        return Response(result_list, status=status.HTTP_200_OK)
+
