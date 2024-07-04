@@ -14,3 +14,10 @@ from ..serializers import ActivitySerializer
 
 from intervaltree import IntervalTree
 from datetime import datetime
+
+
+class ActivityModelViewSet(viewsets.ModelViewSet):
+    queryset = Activity.objects.all()
+    serializer_class = ActivitySerializer
+    # permission_classes = [IsAuthenticated]
+    # permission_classes = [AllowAny]
