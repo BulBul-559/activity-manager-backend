@@ -11,6 +11,7 @@ def formatTimeMDHM(dt):
 def formatTimeMD(dt):
         return dt.strftime("%m月%d日")
 
+
 def formatTimeHM(dt):
         return dt.strftime("%H:%M")
 

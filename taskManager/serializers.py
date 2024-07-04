@@ -61,9 +61,9 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         members_data = validated_data.pop('member')
-        activity = Activity.objects.create(**validated_data)
-        activity.member.set(members_data)
-        return activity
+        task = Activity.objects.create(**validated_data)
+        task.member.set(members_data)
+        return task
 
     def update(self, instance, validated_data):
         members_data = validated_data.pop('member')
