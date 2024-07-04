@@ -75,7 +75,7 @@ class MachineBorrowRecord(models.Model):
     is_cancle = models.BooleanField(default=False)
 
 
-class Task(models.Model):
+class Activity(models.Model):
     name = models.CharField(max_length=100)
     organizer = models.ForeignKey(Youtholer, related_name='burden_task', on_delete=models.CASCADE)
     member = models.ManyToManyField(Youtholer, related_name='attend_task')

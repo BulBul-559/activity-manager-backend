@@ -3,7 +3,7 @@ from .models import Sduter
 from .models import Youtholer
 from .models import Machine
 from .models import MachineBorrowRecord
-from .models import Task
+from .models import Activity
 from .models import RawPhoto
 from .models import PhotoProfile
 from .models import FinalPhoto
@@ -49,19 +49,19 @@ class MachineBorrowRecordSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class ActivitySerializer(serializers.ModelSerializer):
     organizer = YoutholerSerializer(read_only=True)
     organizer_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='organizer', write_only=True)
     member = YoutholerSerializer(many=True, read_only=True)
     member_ids = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), many=True, write_only=True, source='member')
 
     class Meta:
-        model = Task
+        model = Activity
         fields = '__all__'
 
     def create(self, validated_data):
         members_data = validated_data.pop('member')
-        task = Task.objects.create(**validated_data)
+        task = Activity.objects.create(**validated_data)
         task.member.set(members_data)
         return task
 
