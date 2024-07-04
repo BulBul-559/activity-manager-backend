@@ -82,6 +82,7 @@ class Activity(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True)
     is_valid = models.BooleanField(default=True)
+    description = models.CharField(max_length=1000, default='')
 
 
 class RawPhoto(models.Model):
