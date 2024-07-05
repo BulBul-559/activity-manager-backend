@@ -89,7 +89,7 @@ class RawPhoto(models.Model):
     name = models.CharField(max_length=100)
     shoot_time = models.DateTimeField(null=True, blank=True)
     modify_time = models.DateTimeField(auto_now=True)
-    path = models.FilePathField(path='/final/', recursive=True, blank=True, null=True)
+    path = models.FilePathField(path='/rawphoto/', recursive=True, blank=True, null=True)
 
 
 class PhotoProfile(models.Model):
@@ -97,10 +97,18 @@ class PhotoProfile(models.Model):
     path = models.FilePathField(path='profile/')
 
 
+class ActivityEntry(models.Model):
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
+    photo = models.ForeignKey(RawPhoto, on_delete=models.CASCADE)
+    uploader = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+    photo_name = models.CharField(max_length=100)
+    submit_time = models.DateTimeField(auto_now_add=True)
+
+
 class FinalPhoto(models.Model):
     origin = models.ForeignKey(RawPhoto, null=True, on_delete=models.SET_NULL)
     uploader = models.ForeignKey(Youtholer, on_delete=models.DO_NOTHING)
-    path = models.FileField(upload_to='')
+    path = models.FileField(upload_to='final/')
     upload_time = models.DateTimeField(auto_now_add=True)
 
 

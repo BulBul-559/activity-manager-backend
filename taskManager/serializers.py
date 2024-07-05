@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Sduter
+from .models import Sduter, ActivityEntry
 from .models import Youtholer
 from .models import Machine
 from .models import MachineBorrowRecord
@@ -117,4 +117,15 @@ class FinalPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinalPhoto
+        fields = '__all__'
+
+
+class ActivityEntrySerializer(serializers.ModelSerializer):
+    activity = serializers.PrimaryKeyRelatedField(queryset=Activity.objects.all())
+    uploader = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all())
+    photo = serializers.PrimaryKeyRelatedField(queryset=RawPhoto.objects.all())
+
+
+    class Meta:
+        model = ActivityEntry
         fields = '__all__'

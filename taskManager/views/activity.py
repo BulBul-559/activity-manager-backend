@@ -10,9 +10,12 @@ from django.db.models import Q
 from ..models import Youtholer
 from ..models import Machine
 from ..models import Activity
+from ..models import ActivityEntry
 
-from ..serializers import MachineSerializer
+
 from ..serializers import ActivitySerializer
+from ..serializers import MachineSerializer
+from ..serializers import ActivityEntrySerializer
 from ..serializers import YoutholerSerializer
 
 from ..utils import tokenToId
@@ -51,3 +54,13 @@ class ActivityModelViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(activities, many=True)
         return Response(serializer.data)
+
+
+class ActivityEntryModelViewSet(viewsets.ModelViewSet):
+    queryset = ActivityEntry.objects.all()
+    serializer_class = ActivityEntrySerializer
+
+
+
+
+    pass

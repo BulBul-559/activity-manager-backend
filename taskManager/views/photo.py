@@ -13,8 +13,8 @@ from rest_framework import status
 
 import math
 import datetime
-from ..models import RawPhoto, PhotoProfile
-from ..serializers import RawPhotoSerializer, PhotoProfileSerializer
+from ..models import RawPhoto, PhotoProfile, ActivityEntry
+from ..serializers import RawPhotoSerializer, PhotoProfileSerializer, ActivitySerializer
 
 
 class ScanViewSet(viewsets.ViewSet):
@@ -52,12 +52,12 @@ class ScanViewSet(viewsets.ViewSet):
 
                     # 创建缩略图并保存到缩略图文件夹
                     with Image.open(target_path) as img:
-                        img.thumbnail((200, 200))
-                        img.save(thumbnail_path, "JPEG", quality=85)
+                        img.thumbnail((500, 500))
+                        img.save(thumbnail_path, "JPEG", quality=95)
 
                     # 创建新的 PhotoProfile 记录
                     PhotoProfile.objects.create(
-                        origin=raw_photo.id,
+                         origin=raw_photo.id,
                         path=thumbnail_path
                     )
 
