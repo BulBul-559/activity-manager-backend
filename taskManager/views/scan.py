@@ -13,8 +13,8 @@ from rest_framework import status
 
 import math
 import datetime
-from ..models import RawPhoto
-from ..serializers import RawPhotoSerializer
+from ..models import RawPhoto, PhotoProfile
+from ..serializers import RawPhotoSerializer, PhotoProfileSerializer
 
 
 class ScanViewSet(viewsets.ViewSet):
@@ -50,16 +50,16 @@ class ScanViewSet(viewsets.ViewSet):
                         path=target_path
                     )
 
-                    # # 创建缩略图并保存到缩略图文件夹
-                    # with Image.open(target_path) as img:
-                    #     img.thumbnail((200, 200))
-                    #     img.save(thumbnail_path, "JPEG", quality=85)
-                    #
-                    # # 创建新的 PhotoProfile 记录
-                    # PhotoProfile.objects.create(
-                    #     origin=raw_photo,
-                    #     path=thumbnail_path
-                    # )
+                    # 创建缩略图并保存到缩略图文件夹
+                    with Image.open(target_path) as img:
+                        img.thumbnail((200, 200))
+                        img.save(thumbnail_path, "JPEG", quality=85)
+
+                    # 创建新的 PhotoProfile 记录
+                    PhotoProfile.objects.create(
+                        origin=raw_photo.id,
+                        path=thumbnail_path
+                    )
 
                 except Exception as e:
                     # logger.error(f"Failed to process file {image_file}: {e}")
@@ -93,3 +93,24 @@ class RawPhotoModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class PhotoProfileModelViewSet(viewsets.ModelViewSet):
+    queryset = PhotoProfile.objects.all()
+    serializer_class = PhotoProfileSerializer
+    # permission_classes = [IsAuthenticated]
+
+    @action(methods=['get'], detail=True, permission_classes=[AllowAny])
+    def download(self, request, pk=None, *args, **kwargs):
+        file_obj = self.get_object()
+        response = FileResponse(open(file_obj.path, 'rb'))
+        return response
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

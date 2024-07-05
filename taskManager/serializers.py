@@ -6,6 +6,7 @@ from .models import MachineBorrowRecord
 from .models import Activity
 from .models import RawPhoto
 from .models import FinalPhoto
+from .models import PhotoProfile
 from django.urls import reverse
 
 class SduterSerializer(serializers.ModelSerializer):
@@ -91,6 +92,21 @@ class RawPhotoSerializer(serializers.ModelSerializer):
         # 构建下载 URL
         return request.build_absolute_uri(reverse('rawphoto-download', args=[obj.pk]))
 
+
+
+class PhotoProfileSerializer(serializers.ModelSerializer):
+    profile_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PhotoProfile
+        fields = '__all__'
+
+    def get_profile_url(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            return None
+        # 构建下载 URL
+        return request.build_absolute_uri(reverse('photoprofile-download', args=[obj.pk]))
 
 
 class FinalPhotoSerializer(serializers.ModelSerializer):

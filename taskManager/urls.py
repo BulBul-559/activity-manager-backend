@@ -7,6 +7,7 @@ from .views.activity import ActivityModelViewSet
 from .views.public import PublicApiSet
 from .views.scan import ScanViewSet
 from .views.scan import RawPhotoModelViewSet
+from .views.scan import PhotoProfileModelViewSet
 from .views import views
 
 router = DefaultRouter()
@@ -18,8 +19,11 @@ router.register(r'activity', ActivityModelViewSet, basename='activity')
 router.register(r'public', PublicApiSet, basename='public')
 router.register(r'scan', ScanViewSet, basename='scan')
 router.register(r'rawphoto', RawPhotoModelViewSet, basename='rawphoto')
+router.register(r'profile', PhotoProfileModelViewSet, basename='profile')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('photoprofile/<int:pk>/download/', PhotoProfileModelViewSet.as_view({'get': 'download'}),
+         name='photoprofile-download'),
     # path('Create/', view.Create),
 ]

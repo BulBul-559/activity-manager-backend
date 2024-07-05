@@ -91,8 +91,10 @@ class RawPhoto(models.Model):
     modify_time = models.DateTimeField(auto_now=True)
     path = models.FilePathField(path='/final/', recursive=True, blank=True, null=True)
 
-    def __str__(self):
-        return self.name
+
+class PhotoProfile(models.Model):
+    origin = models.IntegerField()
+    path = models.FilePathField(path='profile/')
 
 
 class FinalPhoto(models.Model):
