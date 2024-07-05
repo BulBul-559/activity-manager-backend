@@ -88,18 +88,11 @@ class Activity(models.Model):
 class RawPhoto(models.Model):
     name = models.CharField(max_length=100)
     shoot_time = models.DateTimeField(null=True, blank=True)
-    upload_time = models.DateTimeField(auto_now_add=True)
-    uploader = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
     modify_time = models.DateTimeField(auto_now=True)
-    path = models.FilePathField(path='/path/to/existing/images', match='*.jpg', recursive=True, blank=True, null=True)
+    path = models.FilePathField(path='/final/', recursive=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
-
-
-class PhotoProfile(models.Model):
-    origin = models.ForeignKey(RawPhoto, on_delete=models.CASCADE)
-    path = models.FilePathField(path='')
 
 
 class FinalPhoto(models.Model):

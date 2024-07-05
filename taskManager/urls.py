@@ -5,6 +5,8 @@ from .views.machine import MachineModelViewSet, MachineBorrowViewSet
 from .views.youtholer import YoutholerModelViewSet
 from .views.activity import ActivityModelViewSet
 from .views.public import PublicApiSet
+from .views.scan import ScanViewSet
+from .views.scan import RawPhotoModelViewSet
 from .views import views
 
 router = DefaultRouter()
@@ -14,6 +16,8 @@ router.register(r'borrow', MachineBorrowViewSet, basename='machine-borrow')
 router.register(r'member', YoutholerModelViewSet, basename='member')
 router.register(r'activity', ActivityModelViewSet, basename='activity')
 router.register(r'public', PublicApiSet, basename='public')
+router.register(r'scan', ScanViewSet, basename='scan')
+router.register(r'rawphoto', RawPhotoModelViewSet, basename='rawphoto')
 
 urlpatterns = [
     path('', include(router.urls)),

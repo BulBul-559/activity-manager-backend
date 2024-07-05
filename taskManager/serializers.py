@@ -5,7 +5,6 @@ from .models import Machine
 from .models import MachineBorrowRecord
 from .models import Activity
 from .models import RawPhoto
-from .models import PhotoProfile
 from .models import FinalPhoto
 from django.urls import reverse
 
@@ -17,7 +16,7 @@ class SduterSerializer(serializers.ModelSerializer):
 
 
 class YoutholerSerializer(serializers.ModelSerializer):
-    origin_info =  serializers.PrimaryKeyRelatedField(queryset=Sduter.objects.all())
+    origin_info = serializers.PrimaryKeyRelatedField(queryset=Sduter.objects.all())
 
     class Meta:
         model = Youtholer
@@ -77,22 +76,21 @@ class ActivitySerializer(serializers.ModelSerializer):
         return instance
 
 
+
 class RawPhotoSerializer(serializers.ModelSerializer):
-    uploader = YoutholerSerializer(read_only=True)
-    uploader_id = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all(), source='uploader', write_only=True)
+    photo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = RawPhoto
         fields = '__all__'
 
+    def get_photo_url(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            return None
+        # 构建下载 URL
+        return request.build_absolute_uri(reverse('rawphoto-download', args=[obj.pk]))
 
-class PhotoProfileSerializer(serializers.ModelSerializer):
-    origin = RawPhotoSerializer(read_only=True)  # 嵌套的 RawPhoto 序列化器
-    origin_id = serializers.PrimaryKeyRelatedField(queryset=RawPhoto.objects.all(), source='origin', write_only=True)
-
-    class Meta:
-        model = PhotoProfile
-        fields = '__all__'
 
 
 class FinalPhotoSerializer(serializers.ModelSerializer):
