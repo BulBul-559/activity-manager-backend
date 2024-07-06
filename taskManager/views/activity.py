@@ -60,7 +60,26 @@ class ActivityEntryModelViewSet(viewsets.ModelViewSet):
     queryset = ActivityEntry.objects.all()
     serializer_class = ActivityEntrySerializer
 
+    # def get_queryset(self):
+    #     # 获取请求中的 user 参数
+    #     machine_id = self.request.query_params.get('activity_id')
+    #     # 如果 user 参数存在，则过滤 queryset
+    #     if machine_id:
+    #         return ActivityEntry.objects.filter(machine=machine_id)
+    #     # 如果 user 参数不存在，则返回所有记录
+    #     return ActivityEntry.objects.all()
 
+    def list(self, request, *args, **kwargs):
+        activity_id = request.query_params.get('activity')
+        if activity_id:
+            queryset = self.queryset.filter(activity_id=activity_id)
+        else:
+            queryset = self.queryset.all()
 
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-    pass
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

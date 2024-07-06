@@ -123,7 +123,6 @@ class FinalPhotoSerializer(serializers.ModelSerializer):
 class ActivityEntrySerializer(serializers.ModelSerializer):
     activity = serializers.PrimaryKeyRelatedField(queryset=Activity.objects.all())
     uploader = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all())
-    photo = serializers.PrimaryKeyRelatedField(queryset=RawPhoto.objects.all())
 
 
     class Meta:

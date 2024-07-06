@@ -99,8 +99,8 @@ class PhotoProfile(models.Model):
 
 class ActivityEntry(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
-    photo = models.ForeignKey(RawPhoto, on_delete=models.CASCADE)
     uploader = models.ForeignKey(Youtholer, on_delete=models.CASCADE)
+    photo = models.IntegerField(default=-1, null=True, blank=True)
     photo_name = models.CharField(max_length=100)
     submit_time = models.DateTimeField(auto_now_add=True)
 
