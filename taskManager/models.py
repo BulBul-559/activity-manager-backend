@@ -103,6 +103,7 @@ class ActivityEntry(models.Model):
     photo = models.IntegerField(default=-1, null=True, blank=True)
     photo_name = models.CharField(max_length=100)
     submit_time = models.DateTimeField(auto_now_add=True)
+    description = models.CharField(max_length=1000, null=True, blank=True)
 
 
 class FinalPhoto(models.Model):
