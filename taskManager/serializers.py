@@ -121,10 +121,36 @@ class FinalPhotoSerializer(serializers.ModelSerializer):
 
 
 class ActivityEntrySerializer(serializers.ModelSerializer):
-    activity = serializers.PrimaryKeyRelatedField(queryset=Activity.objects.all())
-    uploader = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all())
-
+    # activity = serializers.PrimaryKeyRelatedField(queryset=Activity.objects.all())
+    # uploader = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all())
+    raw_photo = serializers.SerializerMethodField()
+    photo_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = ActivityEntry
         fields = '__all__'
+
+    def get_raw_photo(self, obj):
+        if obj.photo == -1:
+            return {
+                'id': -1,
+                'photo_url': 'https://bulbul559.cn/ftpFile/img/other/default.png'
+            }  # 这里可以替换成你想要的默认 URL
+        try:
+            raw_photo = RawPhoto.objects.get(id=obj.photo)
+            return RawPhotoSerializer(raw_photo, context=self.context).data
+        except RawPhoto.DoesNotExist:
+            return None
+
+    def get_photo_profile(self, obj):
+        if obj.photo == -1:
+            return {
+                'id': -1,
+                'profile_url': 'https://bulbul559.cn/ftpFile/img/other/default.png'
+            }  # 这里可以替换成你想要的默认 URL
+        try:
+            photo_profile = PhotoProfile.objects.get(origin=obj.photo)
+            return PhotoProfileSerializer(photo_profile, context=self.context).data
+        except PhotoProfile.DoesNotExist:
+            return None
+

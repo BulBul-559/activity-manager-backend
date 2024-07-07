@@ -58,6 +58,7 @@ class Machine(models.Model):
 
     # machine_id = models.IntegerField()
     name = models.CharField(max_length=50, default='Youthol')
+    alias = models.CharField(max_length=10, default='online')
     model = models.CharField(max_length=50)
     purchase_date = models.DateTimeField(auto_now_add=True)
     description = models.CharField(max_length=1000)
@@ -86,6 +87,7 @@ class Activity(models.Model):
 
 
 class RawPhoto(models.Model):
+    machine_id = models.ForeignKey(Machine, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)
     shoot_time = models.DateTimeField(null=True, blank=True)
     modify_time = models.DateTimeField(auto_now=True)
