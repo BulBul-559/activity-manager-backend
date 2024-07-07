@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from ..models import Youtholer
 from ..models import RawPhoto
+from ..models import Machine
 from ..models import PhotoProfile
 from ..models import Activity
 from ..models import ActivityEntry
@@ -20,6 +21,13 @@ from ..serializers import ActivityEntrySerializer
 from ..serializers import YoutholerSerializer
 
 from ..utils import tokenToId, scan_ftp_create_db_entry
+
+
+from datetime import timedelta
+from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django.db.models import Q
 
 from intervaltree import IntervalTree
 from datetime import datetime
@@ -85,9 +93,6 @@ class ActivityEntryModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class ActivityEntryViewSet(viewsets.ViewSet):
-
     @action(detail=False, methods=['get'], url_path="scan")
     def scan_file(self, request):
         """
@@ -95,33 +100,38 @@ class ActivityEntryViewSet(viewsets.ViewSet):
             1. 扫描 FTP 文件夹（调用函数）
             2. 对比 ActivityEntry 和 RawPhoto，找出没有匹配的文件
             3. 创建 ActivityEntry 记录
+
+            首先从 url 中获取到 machine_id，然后在 rawphoto 中寻找 name 与
+            entry 中 photo_name 匹配并且machine_id与url中的machine_id相同，
+            并且shoot_time与entry中的submit_time 相差不超过一周的条目才算完全匹配，
+            然后再执行将entry与rawphoto与photoprofile绑定的操作
         """
 
-        machine_alias = request.query_params.get('machine_alias')
-        scan_ftp_create_db_entry(machine_alias)
-
-        machine_alias = request.query_params.get('machine_alias')
-        scan_ftp_create_db_entry(machine_alias)
+        machine_id = request.query_params.get('machine_id')
+        machine = Machine.objects.get(id=machine_id)
+        scan_ftp_create_db_entry(machine.alias)
 
         # Step 1: 查找所有 photo 为 -1 的 ActivityEntry 记录
         unbound_entries = ActivityEntry.objects.filter(photo=-1)
 
-        # Step 2: 根据 photo_name 部分匹配 RawPhoto
+        # Step 2: 根据 photo_name、machine_id 和 shoot_time 进行匹配
         for entry in unbound_entries:
+            one_week_before = entry.submit_time - timedelta(weeks=1)
+            one_week_after = entry.submit_time + timedelta(weeks=1)
             try:
-                # 使用 __contains 进行部分匹配
-                raw_photo = RawPhoto.objects.get(name__contains=entry.photo_name)
+                # 使用多条件进行匹配
+                raw_photo = RawPhoto.objects.get(
+                    Q(name__contains=entry.photo_name) &
+                    Q(machine=machine_id) &
+                    Q(shoot_time__range=(one_week_before, one_week_after))
+                )
 
                 # Step 3: 更新 ActivityEntry 的 photo 属性
                 entry.photo = raw_photo.id
                 entry.save()
 
-                # 创建 PhotoProfile
-                photo_profile = PhotoProfile(origin=raw_photo.id, path=raw_photo.path)
-                photo_profile.save()
-
             except RawPhoto.DoesNotExist:
                 # 如果没有匹配的 RawPhoto，记录日志或处理异常
                 print(f"No matching RawPhoto found for ActivityEntry id {entry.id} with photo_name {entry.photo_name}")
 
-        return Response({"status": "scan complete"})
+        return Response({"message": "scan complete"},status=status.HTTP_200_OK)
