@@ -143,3 +143,14 @@ class ActivityEntryModelViewSet(viewsets.ModelViewSet):
                 print(f"No matching RawPhoto found for ActivityEntry id {entry.id} with photo_name {entry.photo_name}")
 
         return Response({"message": "scan complete","match_count":f"{match}"},status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path="key")
+    def get_key(self, request):
+        entry_id = request.query_params.get('entry')
+
+        entry = ActivityEntry.objects.get(id=entry_id)
+
+        final_key = f"青春在线-{entry.id:04}{entry.submit_time.strftime('%S')}"
+        print(final_key)
+
+        return Response({"key":final_key},status=status.HTTP_200_OK)
