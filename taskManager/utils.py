@@ -5,7 +5,7 @@ import os
 import shutil
 from PIL import Image
 
-from .models import RawPhoto, PhotoProfile
+from .models import RawPhoto, PhotoProfile, Machine
 
 
 def formatTime(dt):
@@ -32,7 +32,7 @@ def tokenToId(request):
         return HttpResponse(json.dumps({'error': 'Invalid token'}))
 
 
-def scan_ftp_create_db_entry(machine_alias):
+def scan_ftp_create_db_entry(machine_alias, machine_id):
     source_dir = f'ftp/{machine_alias}/'  # 源文件夹路径
     target_dir = f'final/{machine_alias}/'  # 目标文件夹路径
     thumbnail_dir = f'profile/{machine_alias}/'  # 缩略图存放路径
@@ -60,7 +60,8 @@ def scan_ftp_create_db_entry(machine_alias):
                 # 创建新的 RawPhoto 记录
                 raw_photo = RawPhoto.objects.create(
                     name=image_file,
-                    path=target_path
+                    path=target_path,
+                    machine=Machine.objects.get(id=machine_id)
                 )
 
                 # 创建缩略图并保存到缩略图文件夹
@@ -70,7 +71,7 @@ def scan_ftp_create_db_entry(machine_alias):
 
                 # 创建新的 PhotoProfile 记录
                 PhotoProfile.objects.create(
-                     origin=raw_photo.id,
+                    origin=raw_photo.id,
                     path=thumbnail_path
                 )
 

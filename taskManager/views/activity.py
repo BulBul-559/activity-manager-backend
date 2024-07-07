@@ -109,29 +109,37 @@ class ActivityEntryModelViewSet(viewsets.ModelViewSet):
 
         machine_id = request.query_params.get('machine_id')
         machine = Machine.objects.get(id=machine_id)
-        scan_ftp_create_db_entry(machine.alias)
+        scan_ftp_create_db_entry(machine.alias, machine_id)
 
         # Step 1: 查找所有 photo 为 -1 的 ActivityEntry 记录
         unbound_entries = ActivityEntry.objects.filter(photo=-1)
 
         # Step 2: 根据 photo_name、machine_id 和 shoot_time 进行匹配
+        match = 0
+        miss = 0
         for entry in unbound_entries:
             one_week_before = entry.submit_time - timedelta(weeks=1)
             one_week_after = entry.submit_time + timedelta(weeks=1)
             try:
                 # 使用多条件进行匹配
+                # raw_photo = RawPhoto.objects.get(
+                #     Q(name__contains=entry.photo_name) &
+                #     Q(machine=machine_id) &
+                #     Q(shoot_time__range=(one_week_before, one_week_after))
+                # )
+                # shoot time 目前还没有
                 raw_photo = RawPhoto.objects.get(
                     Q(name__contains=entry.photo_name) &
-                    Q(machine=machine_id) &
-                    Q(shoot_time__range=(one_week_before, one_week_after))
+                    Q(machine=entry.machine)
                 )
-
                 # Step 3: 更新 ActivityEntry 的 photo 属性
                 entry.photo = raw_photo.id
                 entry.save()
+                match += 1
 
             except RawPhoto.DoesNotExist:
                 # 如果没有匹配的 RawPhoto，记录日志或处理异常
+                miss += 1
                 print(f"No matching RawPhoto found for ActivityEntry id {entry.id} with photo_name {entry.photo_name}")
 
-        return Response({"message": "scan complete"},status=status.HTTP_200_OK)
+        return Response({"message": "scan complete","match_count":f"{match}"},status=status.HTTP_200_OK)
