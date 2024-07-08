@@ -11,9 +11,13 @@ from rest_framework import status
 import math
 import datetime
 from ..models import RawPhoto, Youtholer
+from ..serializers import RawPhotoSerializer, PhotoProfileSerializer, ActivitySerializer
 
 
-class PublicApiSet(viewsets.ViewSet):
+class PublicApiSet(viewsets.ModelViewSet):
+    queryset = RawPhoto.objects.all()
+    serializer_class = RawPhotoSerializer
+
     startDate = datetime.datetime(2024, 2, 26)
 
     @action(detail=False, methods=['get'], url_path="current-week")

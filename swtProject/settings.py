@@ -90,9 +90,9 @@ CORS_ALLOWED_ORIGINS=['http://127.0.0.1','http://127.0.0.1:5173','http://localho
                         'https://api.bulbul559.cn', 'https://bulbul559.cn','https://api.youthol.online']
 
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['127.0.0.1','127.0.0.1:5173','localhost:5173/','api.youthol.online',
-                        'https://api.bulbul559.cn/', 'https://bulbul559.cn/','https://api.youthol.online/']
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['127.0.0.1','127.0.0.1:5173','localhost:5173/','api.youthol.online','api.bulbul559.cn/',
+#                         'https://api.bulbul559.cn/', 'https://bulbul559.cn/','https://api.youthol.online/']
 
 
 TEMPLATES = [

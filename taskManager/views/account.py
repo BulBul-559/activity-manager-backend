@@ -11,11 +11,13 @@ from ..utils import tokenToId
 
 from ..models import Sduter
 from ..models import Youtholer
+from ..models import RawPhoto
 
-from ..serializers import YoutholerSerializer
+from ..serializers import YoutholerSerializer, RawPhotoSerializer
 
-
-class AccountApiSet(viewsets.ViewSet):
+class AccountApiSet(viewsets.ModelViewSet):
+    queryset = RawPhoto.objects.all()
+    serializer_class = RawPhotoSerializer
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def sign_in(self, request):
