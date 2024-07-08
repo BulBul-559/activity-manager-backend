@@ -68,6 +68,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         members_data = validated_data.pop('member')
         instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
         instance.organizer = validated_data.get('organizer', instance.organizer)
         instance.end_time = validated_data.get('end_time', instance.end_time)
         instance.is_valid = validated_data.get('is_valid', instance.is_valid)
