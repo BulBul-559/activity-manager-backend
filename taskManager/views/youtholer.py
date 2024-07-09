@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from ..models import Youtholer
 from ..models import Sduter
 
-from ..serializers import YoutholerSerializer
+from ..serializers import YoutholerSerializer, SduterSerializer
 
 
 class YoutholerModelViewSet(viewsets.ModelViewSet):
@@ -69,9 +69,10 @@ class YoutholerModelViewSet(viewsets.ModelViewSet):
         sduter = instance.origin_info
 
         data = {
+            'origin_info': sduter.id,  # 用于关联 Sduter
             'id': instance.id,
             'sdut_id': sduter.sdut_id,
-            'name': sduter.name,
+            'name': instance.name,
             'college': sduter.college,
             'grade': sduter.grade,
             'identity': instance.identity,  # 使用 Youtholer 的 identity
@@ -93,6 +94,7 @@ class YoutholerModelViewSet(viewsets.ModelViewSet):
             sduter = youtholer.origin_info
 
             data = {
+                'origin_info': sduter.id,  # 用于关联 Sduter
                 'id': youtholer.id,
                 'sdut_id': sduter.sdut_id,
                 'name': sduter.name,
@@ -109,6 +111,36 @@ class YoutholerModelViewSet(viewsets.ModelViewSet):
             result_list.append(data)
 
         return Response(result_list, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        youtholer_instance = self.get_object()
+        sduter_instance = youtholer_instance.origin_info
+
+        # Update Youtholer fields
+        youtholer_serializer = YoutholerSerializer(youtholer_instance, data=request.data, partial=False)
+        if youtholer_serializer.is_valid():
+            youtholer_serializer.save()
+        else:
+            print("1")
+            return Response(youtholer_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Assuming the request.data contains fields for Sduter as well
+        # Extract Sduter related fields from request.data here
+        # 创建一个 SduterSerializer 实例来访问其 fields 属性
+        sduter_serializer_instance = SduterSerializer()
+        sduter_fields = sduter_serializer_instance.fields.keys()
+
+        # 使用 sduter_fields 来过滤 request.data 中的字段
+        sduter_data = {key: value for key, value in request.data.items() if key in sduter_fields}
+        # Update Sduter fields
+        sduter_serializer = SduterSerializer(sduter_instance, data=sduter_data, partial=False)
+        if sduter_serializer.is_valid():
+            sduter_serializer.save()
+        else:
+            print("2")
+            return Response(sduter_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(youtholer_serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path="list")
     def get_member_list(self, request):
