@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.response import Response
 from django.http import FileResponse
 from django.utils import timezone
+from django.http import HttpResponse
 
 from ..models import Youtholer
 from ..models import Machine
@@ -11,6 +12,7 @@ from ..models import MachineBorrowRecord
 
 from ..serializers import MachineSerializer
 from ..serializers import MachineBorrowRecordSerializer
+from ..utils import tokenToId
 
 from intervaltree import IntervalTree
 from datetime import datetime
@@ -113,3 +115,17 @@ class MachineBorrowViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['get'], detail=False, url_path="my", permission_classes=[IsAuthenticated])
+    def get_my_borrow(self, request):
+        sdut_id = tokenToId(request)
+        if isinstance(sdut_id, HttpResponse):  # 如果 tokenToId 返回的是 HttpResponse，说明 token 无效
+            return sdut_id
+
+        youtholer = Youtholer.objects.filter(sdut_id=sdut_id).first()
+        if not youtholer:
+            return Response({"detail": "未找到对应的用户信息"}, status=status.HTTP_404_NOT_FOUND)
+
+        borrow_records = MachineBorrowRecord.objects.filter(youtholer=youtholer).order_by('-borrow_time')
+        serializer = self.get_serializer(borrow_records, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

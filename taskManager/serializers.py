@@ -42,7 +42,9 @@ class MachineSerializer(serializers.ModelSerializer):
 
 class MachineBorrowRecordSerializer(serializers.ModelSerializer):
     machine = serializers.PrimaryKeyRelatedField(queryset=Machine.objects.all())
+    machine_detail = MachineSerializer(source='machine', read_only=True)
     youtholer = serializers.PrimaryKeyRelatedField(queryset=Youtholer.objects.all())
+    youtholer_detail = YoutholerSerializer(source='youtholer', read_only=True)
 
     class Meta:
         model = MachineBorrowRecord
