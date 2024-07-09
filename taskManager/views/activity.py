@@ -52,10 +52,10 @@ class ActivityModelViewSet(viewsets.ModelViewSet):
 
         # 如果是站长、部长或副部长，则返回全部数据
         if youtholer.position in ['站长', '部长', '副部长']:
-            activities = Activity.objects.all()
+            activities = Activity.objects.all().order_by('-end_time')
         else:
             # 查找 organizer 和 member 中包含这个 youtholer 的所有 Activity
-            activities = Activity.objects.filter(Q(organizer=youtholer) | Q(member=youtholer)).distinct()
+            activities = Activity.objects.filter(Q(organizer=youtholer) | Q(member=youtholer)).distinct().order_by('-end_time')
         page = self.paginate_queryset(activities)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -64,11 +64,7 @@ class ActivityModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(activities, many=True)
         return Response(serializer.data)
 
-    @action(methods=['get'], detail=False, url_path='my-activity')
-    def get_my_activity(self, request):
 
-
-        pass
 
 
 class ActivityEntryModelViewSet(viewsets.ModelViewSet):
