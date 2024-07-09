@@ -14,9 +14,8 @@ from ..models import RawPhoto, Youtholer
 from ..serializers import RawPhotoSerializer, PhotoProfileSerializer, ActivitySerializer
 
 
-class PublicApiSet(viewsets.ModelViewSet):
-    queryset = RawPhoto.objects.all()
-    serializer_class = RawPhotoSerializer
+# class PublicApiSet(viewsets.ModelViewSet):
+class PublicApiSet(viewsets.ViewSet):
 
     startDate = datetime.datetime(2024, 2, 26)
 

@@ -64,6 +64,12 @@ class ActivityModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(activities, many=True)
         return Response(serializer.data)
 
+    @action(methods=['get'], detail=False, url_path='my-activity')
+    def get_my_activity(self, request):
+
+
+        pass
+
 
 class ActivityEntryModelViewSet(viewsets.ModelViewSet):
     queryset = ActivityEntry.objects.all()
@@ -150,7 +156,6 @@ class ActivityEntryModelViewSet(viewsets.ModelViewSet):
 
         entry = ActivityEntry.objects.get(id=entry_id)
 
-        final_key = f"青春在线-{entry.id:04}{entry.submit_time.strftime('%S')}"
-        print(final_key)
+        final_key = f"青春在线-{entry.id:05}{entry.submit_time.strftime('%S')}"
 
         return Response({"key":final_key},status=status.HTTP_200_OK)

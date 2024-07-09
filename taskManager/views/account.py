@@ -15,9 +15,10 @@ from ..models import RawPhoto
 
 from ..serializers import YoutholerSerializer, RawPhotoSerializer
 
-class AccountApiSet(viewsets.ModelViewSet):
-    queryset = RawPhoto.objects.all()
-    serializer_class = RawPhotoSerializer
+# class AccountApiSet(viewsets.ModelViewSet):
+class AccountApiSet(viewsets.ViewSet):
+    # queryset = RawPhoto.objects.all()
+    # serializer_class = RawPhotoSerializer
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def sign_in(self, request):
